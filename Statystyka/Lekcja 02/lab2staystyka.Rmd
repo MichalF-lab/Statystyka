@@ -1,0 +1,80 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE}
+data <- read.csv('C:/Users/micha/source/repos/lesson_01/Statystyka/lab2.csv', sep = ",", dec = ",", header = T, stringsAsFactors = FALSE)
+data$X1 <- as.numeric(data$X1)
+data$X2 <- as.numeric(data$X2)
+data$X3 <- as.numeric(data$X3)
+data$X4 <- as.numeric(data$X4)
+```
+Zad 1  
+```{r}
+hist(data$X1, freq = FALSE)
+lines(seq(-3, 3, 0.01), dnorm(seq(-3, 3, 0.01)))
+```
+
+Rozkład Normalny (0,1)
+```{r}
+hist(data$X2, freq = FALSE)
+lines(seq(0, 3, 0.01), dexp(seq(0, 3, 0.01),1.2))
+```
+
+Rozkład Wykładniczy lambda = 1.2
+```{r}
+hist(data$X3, freq = FALSE)
+lines(seq(0, 6, 0.01), dgamma(seq(0, 6, 0.01),2))
+```
+
+Rozkład Gamma z parametrem 2
+```{r}
+hist(data$X4, freq = FALSE)
+lines(seq(0, 1, 0.001), dnorm(seq(0, 1, 0.001), 0.45, 0.15))
+```
+Rozkład Normalny (0.45, 0.15)  
+Zad 2
+```{r}
+datan <- rnorm(101,1,4)
+datae <- rexp(101,2)
+datab <- rbeta(101,1,1)
+
+# Oblicz kwantyle
+quantiles <- quantile(datan, probs = c(0, 0.25, 0.5, 0.75, 1))
+
+qqnorm(datan)
+```
+Przypomina linie prosta - zgodne z rozkładem N(0,1)
+```{r}
+qqplot(qexp(ppoints(length(datae)),2), datae)
+```
+Przypomina linie prosta - zgodne z rozkładem E(2)
+
+```{r}
+qqplot(qbeta(ppoints(length(datab)),1,1), datab)
+```
+
+Przypomina linie prosta - zgodne z rozkładem B(1,1)  
+# Zad 3
+```{r}
+n = 200
+# Próby z rozkładów normalnych
+data_N01 <- rnorm(n, 0, 1)
+data_N022 <- rnorm(n, 0, 2.2)
+data_N11 <- rnorm(n, 1, 1)
+data_N133 <- rnorm(n, 1, 3.3)
+
+
+boxplot(data_N01, data_N022, data_N11, data_N133)
+```
+  
+Wykresy róanią się między soba medianą oraz odchyleniem punktów od średniej  
+```{r echo=FALSE}
+quantiles1 <- quantile(data_N01, probs = c(0, 0.25, 0.5, 0.75, 1))
+quantiles2 <- qnorm(c(0, 0.25, 0.5, 0.75, 1), mean = 0, sd = 1)
+print(quantiles2-quantiles1)
+```
+
+Różnice kwantyli są mniejsze niż 0.05 co oznacza ze jest git

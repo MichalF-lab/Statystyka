@@ -1,0 +1,183 @@
+---
+title: "Lista 1"
+output: html_document
+---
+```{r}# Imoprt
+data <- read.table('C:/Users/micha/source/repos/lesson_01/Statystyka/Lekcja 01/lab1_dane.txt', dec = ",", header = T)
+```
+Zadanie 1
+```{r} # Zad 1
+catetegory_count <- table(data$typ)
+typ_opis = c('kierownik', 'sprzedawca / marketing', 'urzednik', 'obsluga', 'wolny', 'inne')
+pie(catetegory_count, labels = paste0(round(catetegory_count / 5.36), "%", names(catetegory_count), "."))
+legend("topleft", legend = paste(names(catetegory_count), typ_opis), bty = "n")
+```
+
+```{r}# Zad 2
+data$wyksztalcenie <- cut(data$edu, breaks = c(0, 8, 12, 100), labels = c(1, 2, 3), include.lowest = TRUE)
+data$pensja <- as.numeric(data$zarobki) * 8 * 22 * 3.98
+```
+Zadanie 3
+```{r}# Zad 3
+Dane <- list(
+
+    jsrednia = mean(data$pensja),
+    mediana = median(data$pensja),
+
+    kwartyl1 = quantile(data$pensja, 0.25),
+    kwartyl3 = quantile(data$pensja, 0.75),
+
+    rozstep_miedzykwartylowy = IQR(data$pensja),
+
+    wariancja = var(data$pensja),
+    odchylenie_standardowe = sd(data$pensja),
+
+    min_wartosc = min(data$pensja),
+    max_wartosc = max(data$pensja))
+
+#print(Dane)
+summary(data$pensja)
+```
+Zadanie 4
+```{r}# Zad 4
+# Podstawowe
+Podstawowe <- list(
+    wyksztalcenie <- subset(data$pensja,  data$wyksztalcenie == 1),
+
+    jsrednia = mean(wyksztalcenie),
+    mediana = median(wyksztalcenie),
+
+    kwartyl1 = quantile(wyksztalcenie, 0.25),
+    kwartyl3 = quantile(wyksztalcenie, 0.75),
+
+    rozstep_miedzykwartylowy = IQR(wyksztalcenie),
+
+    wariancja = var(wyksztalcenie),
+    odchylenie_standardowe = sd(wyksztalcenie),
+
+    min_wartosc = min(wyksztalcenie),
+    max_wartosc = max(wyksztalcenie))
+
+# Œrednie
+Srednie <- list(
+    wyksztalcenie <- subset(data$pensja, data$wyksztalcenie == 2),
+
+    jsrednia = mean(wyksztalcenie),
+    mediana = median(wyksztalcenie),
+
+    kwartyl1 = quantile(wyksztalcenie, 0.25),
+    kwartyl3 = quantile(wyksztalcenie, 0.75),
+
+    rozstep_miedzykwartylowy = IQR(wyksztalcenie),
+
+    wariancja = var(wyksztalcenie),
+    odchylenie_standardowe = sd(wyksztalcenie),
+
+    min_wartosc = min(wyksztalcenie),
+    max_wartosc = max(wyksztalcenie))
+
+
+# Wy¿sze
+Wyzsze <- list(
+    wyksztalcenie <- subset(data$pensja, data$wyksztalcenie == 3),
+
+    jsrednia = mean(wyksztalcenie),
+    mediana = median(wyksztalcenie),
+
+    kwartyl1 = quantile(wyksztalcenie, 0.25),
+    kwartyl3 = quantile(wyksztalcenie, 0.75),
+
+    rozstep_miedzykwartylowy = IQR(wyksztalcenie),
+
+    wariancja = var(wyksztalcenie),
+    odchylenie_standardowe = sd(wyksztalcenie),
+
+    min_wartosc = min(wyksztalcenie),
+    max_wartosc = max(wyksztalcenie))
+
+
+#lista <- list(Podstawowe, Srednie, Wyzsze)
+#tabela <- do.call(rbind, lista)
+#print(tabela)
+```
+Wykszta³cenie Podstawowe
+```{r}
+summary(subset(data$pensja, data$wyksztalcenie == 1))
+```
+Wykszta³cenie Œrednie
+```{r}
+summary(subset(data$pensja, data$wyksztalcenie == 2))
+```
+Wykszta³cenie Wy¿sze
+```{r}
+summary(subset(data$pensja, data$wyksztalcenie == 3))
+```
+Zadnie 4
+```{r} # Zad 4
+boxplot(subset(data$pensja, data$wyksztalcenie == 1),
+        subset(data$pensja, data$wyksztalcenie == 2),
+        subset(data$pensja, data$wyksztalcenie == 3),
+        outline = TRUE)
+
+```
+
+
+Wp³yw poziomu wykszta³cenia:
+
+    Mediana wynagrodzenia roœnie wraz z poziomem wykszta³cenia. Osoby z wy¿szym wykszta³ceniem zarabiaj¹ œrednio o 50% wiêcej ni¿ osoby z wykszta³ceniem podstawowym, a o 33% wiêcej ni¿ osoby z wykszta³ceniem œrednim.
+
+
+
+Obserwacje odstaj¹ce:
+
+    W grupach osób z wykszta³ceniem œrednim i wy¿szym zidentyfikowano obserwacje odstaj¹ce, oznaczaj¹ce osoby zarabiaj¹ce znacznie wiêcej ni¿ reszta.
+
+
+```
+```
+Zadanie 5
+```{r}# Zad 5 
+# Wychodzi to samo
+hist(data$pensja, breaks = "Sturges", main = "Histogram pensji", xlab = "Pensja")
+
+# Sta³e
+x <- seq(min(data$pensja), max(data$pensja), length.out = 1000)
+const <- 10 ^ 6 * 15/20
+
+hist(data$pensja, breaks = "FD", main = "Histogram pensji FD", xlab = "Pensja")
+
+# Gêstoœæ rozk³adu normalnego
+lines(x, dnorm(x, mean = mean(data$pensja) - 2500, sd = sd(data$pensja))* const, col = "blue")
+
+# Gêstoœæ rozk³adu jednostajnego
+lines(x, dunif(x, min = min(data$pensja), max = max(data$pensja)) * const, col = "red")
+
+# Gêstoœæ rozk³adu gamma
+lines(x, dgamma(x+8000, shape = 13, scale = 1000) * const, col = "green")
+
+```
+a) Symetria rozk³adu:
+
+Rozk³ad zmiennej "pensja" nie jest symetryczny. Histogram jest wyraŸnie skoœny prawostronnie. Wiêkszoœæ obserwacji skupia siê w lewej czêœci wykresu, a prawa strona jest d³u¿sza i wyci¹gniêta.
+
+b) Dobór rozk³adu ci¹g³ego:
+
+Bior¹c pod uwagê kszta³t histogramu, rozk³ad normalny nie jest najlepszym dopasowaniem do rozk³adu zmiennej "pensja". Rozk³ad normalny jest symetryczny, a histogram "pensja" jest skoœny prawostronnie.
+
+Bardziej odpowiednim rozk³adem dla "pensja" mo¿e byæ rozk³ad gamma. Rozk³ad gamma jest równie¿ skoœny prawostronnie i mo¿e przyjmowaæ ró¿ne kszta³ty, w zale¿noœci od wartoœci parametrów.
+
+Dopasowanie rozk³adu gamma:
+
+Na podstawie histogramu mo¿na oszacowaæ parametry rozk³adu gamma:
+
+    Kszta³t (shape): 13
+    Skala (scale): 1000
+
+```
+```
+Zadanie 6
+```{r}# Zad 6
+Tab <- table(rasa = data$rasa, wyksztacenie = data$wyksztalcenie)
+dimnames(Tab) <- list(rasa = c("biala", "Ameryka centralna / poludniowa", "inna"), wyksztalcenie = c("Podstawowe", "Srednie", "Wyzsze"))
+print(Tab)
+```

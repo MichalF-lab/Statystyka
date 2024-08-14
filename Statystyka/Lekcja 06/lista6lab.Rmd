@@ -1,0 +1,106 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+set.seed(131131)
+library(gtools)
+
+calculate_W2 <- function(m, n, co) {
+    N <- m + n
+    W <- sum(co)
+    W2 <- (W - 0.5 * n * (N + 1)) / sqrt(m * n * (N + 1) / 12)
+    return(W2)
+}
+
+calculate_prob <- function(m, n, alpha) {
+    N <- m + n
+    combi <- combinations(N, n)
+    # Dla każdego wiersza wyłowaj calculate_W2
+    W2s <- apply(combi, 1, function(comb) calculate_W2(m, n, comb))
+    z_alpha <- qnorm(1 - alpha)
+    prob <- mean(W2s >= z_alpha)
+    return(prob)
+}
+
+mn <- list(c(5, 5), c(8, 5), c(10, 5))
+alphas <- c(0.1, 0.05, 0.01, 0.005)
+ext <- matrix(nrow = length(mn), ncol = length(alphas))
+
+for (i in 1:length(mn)) {
+    m <- mn[[i]][1]
+    n <- mn[[i]][2]
+    for (j in 1:length(alphas)) {
+        ext[i, j] <- calculate_prob(m, n, alphas[j])
+    }
+}
+```
+
+```{r echo=FALSE}
+rownames(ext) <- paste("(", sapply(mn, paste, collapse = ","), ")", sep = "")
+colnames(ext) <- paste("alpha =", alphas)
+print(ext)
+```
+
+Dla (5,5) aproksymacja może nie być zbyt dokładna, szczególnie dla małych alpha.
+Dla (8,5) i (10,5) aproksymacja powinna być lepsza, ale wciąż mogą występować pewne rozbieżności.
+
+```{r}
+calculate_alpha0 <- function(m, n, w) {
+    N <- m + n
+    combi <- combinations(N, n)
+    W_values <- rowSums(combi)
+    prob <- mean(W_values >= w)
+    return(prob)
+}
+
+calculate_alpha1 <- function(m, n, w) {
+    N <- m + n
+    W2 <- (w - 0.5 * n * (N + 1)) / sqrt(m * n * (N + 1) / 12)
+    prob <- 1 - pnorm(W2)
+    return(prob)
+}
+
+calculate_alpha2 <- function(m, n, w) {
+    N <- m + n
+    W2 <- (w - 0.5 - 0.5 * n * (N + 1)) / sqrt(m * n * (N + 1) / 12)
+    prob <- 1 - pnorm(W2)
+    return(prob)
+}
+
+
+m <- 6
+n <- 3
+w_values <- c(9, 12, 15, 18, 21)
+
+ext1 <- matrix(nrow = 3, ncol = length(w_values))
+
+for (i in 1:length(w_values)) {
+    ext1[1, i] <- calculate_alpha0(m, n, w_values[i])
+    ext1[2, i] <- calculate_alpha1(m, n, w_values[i])
+    ext1[3, i] <- calculate_alpha2(m, n, w_values[i])
+}
+
+n <- 6
+w_values <- c(27, 33, 39, 45, 51)
+
+ext2 <- matrix(nrow = 3, ncol = length(w_values))
+for (i in 1:length(w_values)) {
+    ext2[1, i] <- calculate_alpha0(m, n, w_values[i])
+    ext2[2, i] <- calculate_alpha1(m, n, w_values[i])
+    ext2[3, i] <- calculate_alpha2(m, n, w_values[i])
+}
+```
+
+```{r echo=FALSE}
+rownames(ext1) <- c("alpha0", "alpha1", "alpha2")
+colnames(ext1) <- paste("w =", w_values)
+print("m = 6, n = 3")
+print(ext1)
+
+rownames(ext2) <- c("alpha0", "alpha1", "alpha2")
+colnames(ext2) <- paste("w =", w_values)
+print("m = 6, n = 6")
+print(ext2)
+```

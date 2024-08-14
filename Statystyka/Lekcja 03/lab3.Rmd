@@ -1,0 +1,100 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r echo=FALSE}
+data <- read.csv('crime.csv', sep = ",", dec = ",", header = T, stringsAsFactors = FALSE)
+data[] <- lapply(data, as.numeric)
+```
+
+```{r}
+# Zad 1
+pairs(data)
+```
+```{r}
+# Zad 2, 3
+M <- cor(data, method = "pearson")
+print(M["Rate",])
+```
+Współczyniki dla samego rate
+```{r}
+print(M)
+```
+Wszystkie wspołczynniki
+
+Zad 3
+Namocniejszy wpływ mają EX1, EX0
+
+Pojawia się problem współliniowości w parach:
+Age S X,
+W Ed EX0 EX1
+
+```{r}
+# Zad 4
+model <- lm(Rate ~ ., data = data)
+
+r_squared <- summary(model)$r.squared
+adj_r_squared <- summary(model)$adj.r.squared
+
+cat("R^2: ", r_squared, "\n")
+cat("Adjusted R^2: ", adj_r_squared, "\n")
+```
+```{r}
+coefficients <- summary(model)$coefficients
+cat("Równanie regresji:\n")
+cat("Rate = ", coefficients[1, 1], " + ", paste(coefficients[-1, 1], "*", rownames(coefficients)[-1], collapse = " + "), "\n")
+```
+
+
+```{r}
+new_data <- data.frame(Age = 150, S = 1, Ed = 90, Ex0 = 50, Ex1 = 60, LF = 500, M = 950, N = 30, NW = 300, U1 = 100, U2 = 40, W = 400, X = 200)
+
+predicted_rate <- predict(model, newdata = new_data)
+cat("Prognozowana wartosc Rate: ", predicted_rate, "\n")
+```
+
+```{r}
+# Zad 5
+model_a <- lm(Rate ~ Ex1 + X + Ed + Age + U2, data = data)
+model_b <- lm(Rate ~ Ex0 + LF + M + N + NW, data = data)
+
+ra_squared <- summary(model_a)$r.squared
+rb_squared <- summary(model_b)$r.squared
+
+adj_ra_squared <- summary(model_a)$adj.r.squared
+adj_rb_squared <- summary(model_b)$adj.r.squared
+
+cat("Ra^2: ", ra_squared, "\n")
+cat("Adjusted Ra^2: ", adj_ra_squared, "\n")
+cat("Rb^2: ", rb_squared, "\n")
+cat("Adjusted Rb^2: ", adj_rb_squared, "\n")
+```
+
+```{r}
+# Zad 6
+best_model <- which.max(c(adj_r_squared, adj_ra_squared, adj_rb_squared))
+cat("Best model: Model", best_model, "\n")
+coefficientsa <- summary(model_a)$coefficients
+print(coefficientsa[-1, 1])
+```
+
+```{r}
+# Zad 7
+predicted_rate <- predict(model_a, newdata = new_data)
+cat("Prognozowana wartosc Rate: ", predicted_rate, "\n")
+```
+
+```{r}
+print(head(data, 1))
+```
+Widać że wartoś Rate jest zdecydowanie bliższa faktycznej próbie w modelu a niż w modelu który zawiera wszystkie zmienne objaśniające
+```{r}
+# Zad 8
+residuals <- resid(model_a)
+qqnorm(residuals)
+qqline(residuals, col = "red")
+```
+  ```{r}
+  ```
+  Jest spełnione założenie o normalnosci wektora błędów

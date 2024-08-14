@@ -1,0 +1,425 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+set.seed(131131)
+
+ks_test <- function(x, F0) {
+    Fn <- ecdf(x)
+    ext <- max(abs(Fn(x) - F0(x)))
+    return(ext)
+}
+
+cvm_test <- function(x, F0) {
+    n <- length(x)
+    z <- F0(sort(x))
+    ext <- sum((z - (2 * (1:n) - 1) / (2 * n)) ^ 2) + 1 / (12 * n)
+    return(ext)
+}
+
+ad_test <- function(x, F0) {
+    n <- length(x)
+    z <- F0(sort(x))
+    ext <- -n - mean((2 * (1:n) - 1) * (log(z) + log(1 - rev(z))))
+    return(ext)
+}
+
+# N(0,1)
+generate_1 <- function(n) {
+    return(rnorm(n, mean = 0, sd = 1))
+}
+
+# N(0,5^2)
+generate_2 <- function(n) {
+    return(rnorm(n, mean = 0, sd = 5))
+}
+
+# 0.99*N(0.,1) + 0.01*N(0,100)
+generate_3 <- function(n, epsilon = 0.01, sigma = 100) {
+    z <- rbinom(n, 1, 1 - epsilon)
+    return(z * rnorm(n, 0, 1) + (1 - z) * rnorm(n, 0, sigma))
+}
+
+# L(0,1)
+generate_4 <- function(n) {
+    return(rlaplace(n, 0, 1))
+}
+
+
+# Stałe
+n <- 100
+M <- 1000
+```
+
+# KS-test
+```{r}
+test_func <- ks_test
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 1)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 1)
+gen1 <- generate_1
+```
+
+#Ta pętla bedzie wyłowyana dla każdego testu
+
+```{r}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 5)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 5)
+gen1 <- generate_2
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+Dis1 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, 0, 1) + 0.01 * pnorm(x, 0, 100))
+}
+F0 <- Dis1
+Dis2 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, -0.2, 1) + 0.01 * pnorm(x, - 0.2, 100))
+}
+H1 <- Dis2
+gen1 <- generate_3
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+library(VGAM)
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) plaplace(x, 0 , 1)
+H1 <- function(x) plaplace(x, -0.2 , 1)
+gen1 <- generate_4
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+# Cm test
+```{r}
+test_func <- cvm_test
+```
+
+```{r}
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 1)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 1)
+gen1 <- generate_1
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 5)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 5)
+gen1 <- generate_2
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+Dis1 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, 0, 1) + 0.01 * pnorm(x, 0, 100))
+}
+F0 <- Dis1
+Dis2 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, -0.2, 1) + 0.01 * pnorm(x, - 0.2, 100))
+}
+H1 <- Dis2
+gen1 <- generate_3
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+library(VGAM)
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) plaplace(x, 0 , 1)
+H1 <- function(x) plaplace(x, -0.2 , 1)
+gen1 <- generate_4
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+# ad test
+```{r}
+ad_test <- cvm_test
+```
+
+```{r}
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 1)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 1)
+gen1 <- generate_1
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) pnorm(x, mean = 0, sd = 5)
+H1 <- function(x) pnorm(x, mean = - 0.2, sd = 5)
+gen1 <- generate_2
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+Dis1 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, 0, 1) + 0.01 * pnorm(x, 0, 100))
+}
+F0 <- Dis1
+Dis2 <- function(x) {
+  return ((1 - 0.01) * pnorm(x, -0.2, 1) + 0.01 * pnorm(x, - 0.2, 100))
+}
+H1 <- Dis2
+gen1 <- generate_3
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+```{r}
+library(VGAM)
+rH0 <- 0
+rH1 <- 0
+crit <- 0.148
+F0 <- function(x) plaplace(x, 0 , 1)
+H1 <- function(x) plaplace(x, -0.2 , 1)
+gen1 <- generate_4
+```
+
+
+```{r echo=FALSE}
+for (i in 1:M) {
+    x_H0 <- gen1(n)
+    testH0 <- test_func(x_H0, F0)
+    statment0 <- (testH0 > crit)
+    rH0 <- rH0 + statment0
+
+    testH1 <- test_func(x_H0, H1)
+    statment1 <- (testH1 > crit)
+    rH1 <- rH1 + statment1
+}
+level <- rH0 / M
+power <- rH1 / M
+
+print(c(level, power))
+```
+
+
+
+
