@@ -12,7 +12,13 @@ Skrypty R, R Markdown i materiały z kolejnych zajęć ze statystyki zaawansowan
 
 | Folder | Zawartość |
 |---|---|
-| `lekcja-01`–`lekcja-07` | Skrypty R, R Markdown, dane wejściowe (CSV/XLSX) oraz treści list zadań (PDF) |
+| `lekcja-01/` | Statystyki opisowe wynagrodzeń i wykształcenia pracowników |
+| `lekcja-02/` | Dopasowanie rozkładów (histogramy, QQ-plot) do danych z próby |
+| `lekcja-03/` | Pasmo ufności ECDF, estymacja gęstości, regresja liniowa na danych o przestępczości |
+| `lekcja-04/` | Rozszerzone modele regresji przestępczości + predykcja dla nowego przypadku |
+| `lekcja-05/` | Symulacja pokrycia przedziałów ufności dla proporcji (Wald, Wilson, Agresti-Coull, LRT) |
+| `lekcja-06/` | Dokładny test Wilcoxona-Manna-Whitneya (przez pełną enumerację) |
+| `lekcja-07/` | Testy zgodności rozkładu: Kołmogorowa-Smirnowa, Craméra-von Misesa, Andersona-Darlinga |
 
 ## 🛠️ Technologie
 
